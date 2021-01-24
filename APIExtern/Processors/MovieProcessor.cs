@@ -11,6 +11,11 @@ namespace MovieAPI.APIExtern.Processors
     {
         public static async Task<IEnumerable<MovieModel>> LoadMovie(int year, string title)
         {
+            if (title == null)
+            {
+                title = "";
+            }
+
             string url = "http://www.omdbapi.com/?apikey=7d7c67a8&type=movie";
             if (year > 0 && title.Length > 0)
             {
