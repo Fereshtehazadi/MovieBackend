@@ -9,6 +9,7 @@ using MovieAPI.Models;
 using MovieApi.Models;
 using MovieAPI.DTOs;
 using MovieAPI.APIExtern.Processors;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace MovieAPI.Controllers
 {
@@ -16,10 +17,12 @@ namespace MovieAPI.Controllers
     [ApiController]
     public class MoviesController : ControllerBase
     {
+        private IMemoryCache _cache;
         private readonly MovieContext _context;
 
-        public MoviesController(MovieContext context)
+        public MoviesController(MovieContext context, IMemoryCache cache)
         {
+            _cache = cache;
             _context = context;
         }
 
@@ -27,11 +30,14 @@ namespace MovieAPI.Controllers
         [HttpGet]
         public async Task<IEnumerable<MovieModel>> GetMovies(string title,int year)
         {
-            var movies = await MovieProcessor.LoadMovie(year, title);
+            //var movies = await MovieProcessor.LoadMovie(year, title);
+            var movies = await _cache.GetOrCreateAsync($"title={title}, year={year}", async cacheEntry => 
+            {
+                cacheEntry.SlidingExpiration = TimeSpan.FromMinutes(60);
+                return await MovieProcessor.LoadMovie(year, title);
+            });                                    
+
             return movies;
-
-
-            //Movies = new BindableCollection<MovieModel>(await MovieProcessor.LoadMovie(SearchYear, SearchTitle));
         }
 
         // GET: api/Movies/5

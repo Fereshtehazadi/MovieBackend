@@ -32,6 +32,7 @@ namespace MovieAPI
             services.AddDbContext<MovieContext>(opt =>
                opt.UseInMemoryDatabase("Movie"));
             services.AddControllers();
+            services.AddMemoryCache();
 
         }
 
